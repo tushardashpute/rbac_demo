@@ -1,0 +1,140 @@
+# Default values for discovery-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: paulczar/petclinic
+  tag: 2.1.0.BUILD-SNAPSHOT
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  # name: ~
+
+rbac:
+  create: true
+
+podAnnotations: {}
+#  prometheus.io/scrape: "true"
+#  prometheus.io/path: "/actuator/prometheus"
+
+spring:
+  ## Uncomment if you want to activate a specfic spring profile
+  # profile: kubernetes
+  ## Ensures that Spring trusts Kubernetes certificate for use with
+  ## service discovery, configuration, etc.
+  trustKubernetesCertificates: true
+  ## customized parameters/config for your spring app.
+  ## by default will be rendered to `/config/application.yml`
+  config:
+    ## Currently only supports file
+    type: file
+    ## Contents of config in YAML
+    # content: |-
+    #   spring:
+    #     database:
+    ## An optional secret that contains a base64 encoded YAML file to be loaded in
+    ## for passwords and other secrets, by default `/config/secret.yml`
+    ## this secret must only have a single key of `secret.yml: |-`.
+    # secretName: configSecret
+
+## The list of ports that your app listens on
+containerPort: 8080
+
+extraEnv: {}
+  ## Extra environment variables to be injected
+  # DATABASE_ENGINE: mysql
+  # DATABASE_HOST: mysql
+  # DATABASE_NAME: spring
+  # DATABASE_USERNAME: spring
+  # DATABASE_PASSWORD: spring
+
+securityContext: {}
+  # runAsUser: 1000
+  # fsGroup: 1000
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+## uncomment and modify the following livenessProbe and readinessProbe.
+## These defaults should work with anything that uses the spring health actuator.
+livenessProbe: {}
+#  httpGet:
+#    path: /actuator/health
+#    port: http
+#  initialDelaySeconds: 300
+#  periodSeconds: 10
+readinessProbe: {}
+#  httpGet:
+#    path: /actuator/health
+#    port: http
+#  initialDelaySeconds: 60
+#  periodSeconds: 10
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+service:
+  enabled: true
+  httpPort: 80
+  ## If service.type is not set to NodePort, the following statement
+  ## will be ignored.
+  ##
+  # nodePort: 32015
+
+  ## Service type can be set to ClusterIP, NodePort or LoadBalancer.
+  ##
+  type: ClusterIP
+
+  ## Service annotations
+  ##
+  # annotations:
+  #   service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+  #   service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:xx-xxxx-x:xxxxxxxxxxx:certificate/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxx
+  #   external-dns.alpha.kubernetes.io/hostname: drone.domain.tld.
+
+ingress:
+  ## If true, Ingress will be created.
+  ##
+  enabled: false
+
+  ## Ingress annotations
+  ##
+  # annotations:
+  #   kubernetes.io/ingress.class: gce
+  #   kubernetes.io/ingress.class: nginx
+  #   kubernetes.io/tls-acme: 'true'
+
+  ## hostnames must be provided if Ingress is enabled
+  ##
+  # hosts:
+  #   - spring.example.io
+
+  ## Ingress TLS configuration secrets
+  ## Must be manually created in the namespace
+  ##
+  # tls:
+  #   - secretName: spring-tls
+  #     hosts:
+  #       - spring.example.io
+
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
