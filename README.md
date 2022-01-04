@@ -1,25 +1,23 @@
 # rbac_demo
 
-RBAC DEMO
-
-Assumption : EKS cluster is ready and helm is installed
+**Assumption** : EKS cluster is ready and helm is installed
 
 # Steps:
 
 1.	Install springboot application
-2.	Create user sptest
+2.	Create user rbac-user
 3.	MAP user to K8S
 4.	Test new user
 5.	Create role and binding
 6.	Verify role and binding
 
-1.Install Springboob application in test namespace.
+# 1.Install Springboob application.
 
 # helm install my-release helm-chart-spring
 
 # helm ls 
-NAME      	NAMESPACE	REVISION	UPDATED                                	STATUS  	CHART       	APP VERSION         
-my-release	default  	1       	2022-01-04 14:59:11.020727812 +0000 UTC	deployed	spring-0.0.6	2.1.0.BUILD-SNAPSHOT
+    NAME      	NAMESPACE	REVISION	UPDATED                                	STATUS  	CHART       	APP VERSION         
+    my-release	default  	1       	2022-01-04 14:59:11.020727812 +0000 UTC	deployed	spring-0.0.6	2.1.0.BUILD-SNAPSHOT
 
 
 # k get all
@@ -38,7 +36,7 @@ my-release	default  	1       	2022-01-04 14:59:11.020727812 +0000 UTC	deployed	s
     replicaset.apps/my-release-spring-5b8f9bb6f5   1         1         1       21s
 
 
-**1.Create user rbac-user**
+**2.Create user rbac-user**
 
 aws iam create-user --user-name rbac-user
 aws iam create-access-key --user-name rbac-user | tee /tmp/create_output.json
@@ -49,7 +47,7 @@ aws iam create-access-key --user-name rbac-user | tee /tmp/create_output.json
                 "UserName": "rbac-user", 
                 "Path": "/", 
                 "CreateDate": "2022-01-04T15:17:31Z", 
-                "UserId": "AIDAYDLHWZBLCPLXXAIOP", 
+                "UserId": "AIDAYDLH#############XAIOP", 
                 "Arn": "arn:aws:iam::556952635478:user/rbac-user"
             }
         }
@@ -59,11 +57,12 @@ aws iam create-access-key --user-name rbac-user | tee /tmp/create_output.json
               "UserName": "rbac-user", 
               "Status": "Active", 
               "CreateDate": "2022-01-04T15:17:31Z", 
-              "SecretAccessKey": "oPPiIdSfA888bK39+oJqe2jZG+aTTXtnoPPyZQTU", 
-              "AccessKeyId": "AKIAYDLHWZBLPPZ2LPUS"
+              "SecretAccessKey": "oPPiIdSfA888b#################TTXtnoPPyZQTU", 
+              "AccessKeyId": "AKIAYDLHWZBLPP#########"
           }
       }
 
+3.	MAP user to K8S
 
 # cat << EoF > rbacuser_creds.sh
       > export AWS_SECRET_ACCESS_KEY=$(jq -r .AccessKey.SecretAccessKey /tmp/create_output.json)
@@ -92,7 +91,7 @@ aws iam create-access-key --user-name rbac-user | tee /tmp/create_output.json
 
   {
       "Account": "556952635478", 
-      "UserId": "AIDAYDLHWZBLCPLXXAIOP", 
+      "UserId": "AIDAYDLHW#######XXAIOP", 
       "Arn": "arn:aws:iam::556952635478:user/rbac-user"
   }
 
@@ -106,7 +105,7 @@ aws iam create-access-key --user-name rbac-user | tee /tmp/create_output.json
 # aws sts get-caller-identity
   {
       "Account": "556952635478", 
-      "UserId": "AROAYDLHWZBLH3RLKU6KG:i-09ec02a03bfd55fb3", 
+      "UserId": "AROAYDLHW#######RLKU6KG:i-09ec02a03bfd55fb3", 
       "Arn": "arn:aws:sts::556952635478:assumed-role/ec2-role-for-creating-ekscluster/i-09ec02a03bfd55fb3"
   }
 
@@ -150,7 +149,7 @@ aws iam create-access-key --user-name rbac-user | tee /tmp/create_output.json
 # . rbacuser_creds.sh; aws sts get-caller-identity
   {
       "Account": "556952635478", 
-      "UserId": "AIDAYDLHWZBLCPLXXAIOP", 
+      "UserId": "AIDAY#########PLXXAIOP", 
       "Arn": "arn:aws:iam::556952635478:user/rbac-user"
   }
 
