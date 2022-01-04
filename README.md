@@ -62,7 +62,7 @@ aws iam create-access-key --user-name rbac-user | tee /tmp/create_output.json
           }
       }
 
-3.	MAP user to K8S
+**3.	MAP user to K8S**
 
 # cat << EoF > rbacuser_creds.sh
       > export AWS_SECRET_ACCESS_KEY=$(jq -r .AccessKey.SecretAccessKey /tmp/create_output.json)
@@ -85,6 +85,7 @@ aws iam create-access-key --user-name rbac-user | tee /tmp/create_output.json
       name: aws-auth
       namespace: kube-system
 
+**4.	Test new user**
 # . rbacuser_creds.sh
 
 # aws sts get-caller-identity
@@ -109,6 +110,7 @@ aws iam create-access-key --user-name rbac-user | tee /tmp/create_output.json
       "Arn": "arn:aws:sts::556952635478:assumed-role/ec2-role-for-creating-ekscluster/i-09ec02a03bfd55fb3"
   }
 
+**5.	Create role and binding**
 
 # cat << EoF > rbacuser-role.yaml
     > kind: Role
@@ -145,6 +147,8 @@ aws iam create-access-key --user-name rbac-user | tee /tmp/create_output.json
   role.rbac.authorization.k8s.io/pod-reader created
   [root@ip-172-31-28-184 opt]# kubectl apply -f rbacuser-role-binding.yaml
   rolebinding.rbac.authorization.k8s.io/read-pods created
+
+**6. Verify role and binding**
 
 # . rbacuser_creds.sh; aws sts get-caller-identity
   {
