@@ -21,7 +21,7 @@
     my-release	default  	1       	2022-01-04 14:59:11.020727812 +0000 UTC	deployed	spring-0.0.6	2.1.0.BUILD-SNAPSHOT
 
 
-**# k get all**
+**# kubectl get all**
 
     NAME                                     READY   STATUS    RESTARTS   AGE
     pod/my-release-spring-5b8f9bb6f5-lfxjw   1/1     Running   0          21s
@@ -173,7 +173,7 @@
   }
 
 
-**# k get pods**
+**# kubectl get pods**
 
   NAME                                 READY   STATUS    RESTARTS   AGE
   my-release-spring-5b8f9bb6f5-lfxjw   1/1     Running   0          43m
