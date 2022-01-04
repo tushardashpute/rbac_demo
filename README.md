@@ -13,14 +13,15 @@
 
 # 1.Install Springboob application.
 
-# helm install my-release helm-chart-spring
+**# helm install my-release helm-chart-spring**
 
-# helm ls 
+**# helm ls**
+
     NAME      	NAMESPACE	REVISION	UPDATED                                	STATUS  	CHART       	APP VERSION         
     my-release	default  	1       	2022-01-04 14:59:11.020727812 +0000 UTC	deployed	spring-0.0.6	2.1.0.BUILD-SNAPSHOT
 
 
-# k get all
+**# k get all**
 
     NAME                                     READY   STATUS    RESTARTS   AGE
     pod/my-release-spring-5b8f9bb6f5-lfxjw   1/1     Running   0          21s
@@ -36,12 +37,13 @@
     replicaset.apps/my-release-spring-5b8f9bb6f5   1         1         1       21s
 
 
-**2.Create user rbac-user**
+# 2.Create user rbac-user
 
-aws iam create-user --user-name rbac-user
-aws iam create-access-key --user-name rbac-user | tee /tmp/create_output.json
+    aws iam create-user --user-name rbac-user
+    aws iam create-access-key --user-name rbac-user | tee /tmp/create_output.json
 
-# aws iam create-user --user-name rbac-user
+**# aws iam create-user --user-name rbac-user**
+
         {
             "User": {
                 "UserName": "rbac-user", 
@@ -51,7 +53,8 @@ aws iam create-access-key --user-name rbac-user | tee /tmp/create_output.json
                 "Arn": "arn:aws:iam::556952635478:user/rbac-user"
             }
         }
-# aws iam create-access-key --user-name rbac-user | tee /tmp/create_output.json
+**# aws iam create-access-key --user-name rbac-user | tee /tmp/create_output.json**
+
       {
           "AccessKey": {
               "UserName": "rbac-user", 
@@ -62,16 +65,18 @@ aws iam create-access-key --user-name rbac-user | tee /tmp/create_output.json
           }
       }
 
-**3.	MAP user to K8S**
+# 3.	MAP user to K8S
 
-# cat << EoF > rbacuser_creds.sh
+**# cat << EoF > rbacuser_creds.sh**
+
       > export AWS_SECRET_ACCESS_KEY=$(jq -r .AccessKey.SecretAccessKey /tmp/create_output.json)
       > export AWS_ACCESS_KEY_ID=$(jq -r .AccessKey.AccessKeyId /tmp/create_output.json)
       > EoF
 
-#kubectl get configmap -n kube-system aws-auth -o yaml | grep -v "creationTimestamp\|resourceVersion\|selfLink\|uid" | sed '/^  annotations:/,+2 d' > aws-auth.yaml
+**# kubectl get configmap -n kube-system aws-auth -o yaml | grep -v "creationTimestamp\|resourceVersion\|selfLink\|uid" | sed '/^  annotations:/,+2 d' > aws-auth.yaml**
 
-# cat aws-auth.yaml 
+**# cat aws-auth.yaml** 
+
     apiVersion: v1
     data:
       mapRoles: |
@@ -85,10 +90,10 @@ aws iam create-access-key --user-name rbac-user | tee /tmp/create_output.json
       name: aws-auth
       namespace: kube-system
 
-**4.	Test new user**
-# . rbacuser_creds.sh
+# 4.	Test new user
+**# . rbacuser_creds.sh**
 
-# aws sts get-caller-identity
+**# aws sts get-caller-identity**
 
   {
       "Account": "556952635478", 
@@ -96,23 +101,26 @@ aws iam create-access-key --user-name rbac-user | tee /tmp/create_output.json
       "Arn": "arn:aws:iam::556952635478:user/rbac-user"
   }
 
-# kubectl get pods -n rbac-test
+**# kubectl get pods -n rbac-test**
 
-  Error from server (Forbidden): pods is forbidden: User "rbac-user" cannot list resource "pods" in API group "" in the namespace "default"
+  _Error from server (Forbidden): pods is forbidden: User "rbac-user" cannot list resource "pods" in API group "" in the namespace "default"_
 
-# unset AWS_SECRET_ACCESS_KEY
-# unset AWS_ACCESS_KEY_ID
+**# unset AWS_SECRET_ACCESS_KEY**
 
-# aws sts get-caller-identity
+**# unset AWS_ACCESS_KEY_ID**
+
+**# aws sts get-caller-identity**
+
   {
       "Account": "556952635478", 
       "UserId": "AROAYDLHW#######RLKU6KG:i-09ec02a03bfd55fb3", 
       "Arn": "arn:aws:sts::556952635478:assumed-role/ec2-role-for-creating-ekscluster/i-09ec02a03bfd55fb3"
   }
 
-**5.	Create role and binding**
+# 5.	Create role and binding
 
-# cat << EoF > rbacuser-role.yaml
+**# cat << EoF > rbacuser-role.yaml**
+
     > kind: Role
     > apiVersion: rbac.authorization.k8s.io/v1
     > metadata:
@@ -127,7 +135,8 @@ aws iam create-access-key --user-name rbac-user | tee /tmp/create_output.json
     >   verbs: ["get", "list", "watch"]
     > EoF
 
-# cat << EoF > rbacuser-role-binding.yaml
+**# cat << EoF > rbacuser-role-binding.yaml**
+
     > kind: RoleBinding
     > apiVersion: rbac.authorization.k8s.io/v1
     > metadata:
@@ -143,14 +152,18 @@ aws iam create-access-key --user-name rbac-user | tee /tmp/create_output.json
     >   apiGroup: rbac.authorization.k8s.io
     > EoF
 
-# kubectl apply -f rbacuser-role.yaml
-  role.rbac.authorization.k8s.io/pod-reader created
-  [root@ip-172-31-28-184 opt]# kubectl apply -f rbacuser-role-binding.yaml
-  rolebinding.rbac.authorization.k8s.io/read-pods created
+**# kubectl apply -f rbacuser-role.yaml**
 
-**6. Verify role and binding**
+      role.rbac.authorization.k8s.io/pod-reader created
+      
+**# kubectl apply -f rbacuser-role-binding.yaml**
+ 
+      rolebinding.rbac.authorization.k8s.io/read-pods created
 
-# . rbacuser_creds.sh; aws sts get-caller-identity
+# 6. Verify role and binding
+
+**# . rbacuser_creds.sh; aws sts get-caller-identity**
+
   {
       "Account": "556952635478", 
       "UserId": "AIDAY#########PLXXAIOP", 
@@ -158,12 +171,14 @@ aws iam create-access-key --user-name rbac-user | tee /tmp/create_output.json
   }
 
 
-# k get pods
+**# k get pods**
+
   NAME                                 READY   STATUS    RESTARTS   AGE
   my-release-spring-5b8f9bb6f5-lfxjw   1/1     Running   0          43m
 
 
-[root@ip-172-31-28-184 opt]# kubectl get pods -n kube-system
+**# kubectl get pods -n kube-system**
+
   Error from server (Forbidden): pods is forbidden: User "rbac-user" cannot list resource "pods" in API group "" in the namespace "kube-system"
 
 
