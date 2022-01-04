@@ -11,7 +11,7 @@
 5.	Create role and binding
 6.	Verify role and binding
 
-# 1.Install Springboob application.
+# 1.Install Springboot application.
 
 **# helm install my-release helm-chart-spring**
 
@@ -104,6 +104,8 @@
 **# kubectl get pods -n rbac-test**
 
   _Error from server (Forbidden): pods is forbidden: User "rbac-user" cannot list resource "pods" in API group "" in the namespace "default"_
+  
+    User will get error as he is not having any permission to view obejects in any namespace.
 
 **# unset AWS_SECRET_ACCESS_KEY**
 
@@ -176,6 +178,7 @@
   NAME                                 READY   STATUS    RESTARTS   AGE
   my-release-spring-5b8f9bb6f5-lfxjw   1/1     Running   0          43m
 
+    Now rbac-user user is able to see obejects of default namespace, but we have not provieded any permission on kube-system so he will get error.
 
 **# kubectl get pods -n kube-system**
 
