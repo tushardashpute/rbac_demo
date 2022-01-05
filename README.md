@@ -89,6 +89,10 @@
     metadata:
       name: aws-auth
       namespace: kube-system
+    data:
+      mapUsers: |
+         - userarn: arn:aws:iam::556952635478:user/rbac-user
+           username: rbac-user
 
 # 4.	Test new user
 **# . rbacuser_creds.sh**
